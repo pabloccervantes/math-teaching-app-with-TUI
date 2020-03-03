@@ -1,5 +1,5 @@
 <img align="right" src="https://conacic.cs.buap.mx/images/fcclogo.png" width="60">
-<h2>Project summary</h2><br>
+<h2>Project summary</h2>
 <p align="justify">As part of the professional practice program that bears the name of: <i>"Sistemas y ambientes educativos"</i> (<i>"Educational systems and environments"</i>), it was requested to generate a desktop application for elementary students about mathematics assessments with which they will interact by using a  tangible user interface (<i>smart mat</i>) already provided, with The following requirements:</p>
 <p align="justify">
 <ul>
@@ -8,7 +8,7 @@
         <li>The exercises that will be shown to the student must be adapted to interact with the <i>TUI</i> through the classic <i>game of the plane</i>.
 </ul>
 </p>
-<h2>Project Objectives</h2><br>
+<h2>Project Objectives</h2>
 <p align="justify">The overall objective of the project is:</p>
 <p align="justify">
 <ul>
