@@ -24,3 +24,5 @@
         <li>Validate the application system with the specification of the necessary tests that demonstrate its correct operation in order to release the product with the best possible software quality.
 </ul>
 </p>
+<h2>Navigation within the application</h2>
+<img src="http://drive.google.com/uc?export=view&id=1qkB-_4TyqZ8inUee_JKFEdAI6l58wZNI" width="400">
