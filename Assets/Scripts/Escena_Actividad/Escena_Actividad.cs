@@ -77,10 +77,13 @@ public class Escena_Actividad : MonoBehaviour {
 	//------------Animación libreta----------------
 	//---------------------------------------------
 	public  Texture2D[] frames;
+	public  Texture2D[] frames_pasando_pagina;
 	public float framesPorSegundo = 10;
 	public RawImage libreta;
 	private bool bandera_abriendo_libreta = true;
 	private float aux_opacidad = 0f;
+	private bool animacion_pasando_pagina = false;
+	private float time_inicio_frame = 0f;
 	//---------------------------------------------
 	//---------------------------------------------
 	//---------------------------------------------
@@ -100,6 +103,7 @@ public class Escena_Actividad : MonoBehaviour {
 	public GameObject GO_avion_lapiz_4;
 	//Libreta > aviones a lápiz
 	private bool bandera_termino_opacidad = false;
+	private bool bandera_termino_opacidad_1 = true;
 	//AVIÓN 1
 	public GameObject GO_subtitulo_avion_1;
 	public GameObject GO_num_1_1;public GameObject GO_fondo_1_1;
@@ -191,9 +195,11 @@ public class Escena_Actividad : MonoBehaviour {
     //-----------------Variables de control------------------------
     //-------------------------------------------------------------
     private byte pregunta_actual = 1;
-    private string[] array_camino_correcto;
+    List<string> array_camino_correcto = new List<string>();
     private int tiempo_para_pregunta_actual = 0;
     private int numero_de_opciones_pregunta_actual = 0;
+    private byte numero_de_preguntas = 0;
+    private bool bandera_pasar_a_siguiente_pregunta = false;
     //-------------------------------------------------------------
     //-------------------------------------------------------------
     //-------------------------------------------------------------
@@ -203,14 +209,14 @@ public class Escena_Actividad : MonoBehaviour {
 		//----------------Base de Datos SQLite--------------------
 		//--------------------------------------------------------
 		BDfile = "URI=file:" + Application.dataPath + "/BD/BD_Avion.sqlite";
-		byte numero_de_preguntas = 0;
 		switch(PlayerPrefs.GetInt("num_preguntas")){
 			case 1: numero_de_preguntas = 1; break;
 			case 2: numero_de_preguntas = 3; break;
 			case 3: numero_de_preguntas = 5; break;
 			case 4: numero_de_preguntas = 10; break;
 		}
-		obtener_datos_SQLite(PlayerPrefs.GetInt("seleccion_de_tema"),numero_de_preguntas);
+		obtener_datos_SQLite(PlayerPrefs.GetInt("seleccion_de_tema"));
+		//array_camino_correcto.ForEach(el => Debug.Log(el));//Se imprime array camino correcto
 		//--------------------------------------------------------
 		//--------------------------------------------------------
 		//--------------------------------------------------------
@@ -315,51 +321,70 @@ public class Escena_Actividad : MonoBehaviour {
 		//----------------------------------------------------------
     }
 
-    //Función de prueba SQLite
-	private void prueba_SQLite(){
-		//Se crea conexión con Base de Datos
-		using(IDbConnection conexionBD = new SqliteConnection(BDfile)){
-			conexionBD.Open();//Se abre la conexión
-			//Se prepara para consulta
-			using(IDbCommand comandoBD = conexionBD.CreateCommand()){
-				string SQL = "SELECT texto_pregunta FROM preguntas WHERE id_tema = 1";
-				comandoBD.CommandText = SQL;
-				//Leer el resultado de la consulta
-				using(IDataReader puntero_1 = comandoBD.ExecuteReader()){
-					while (puntero_1.Read()){
-						Debug.Log(puntero_1.GetString(0));
-						//Debug.Log("tiempo en segundos: "+puntero_1.GetInt32(0));
-					}
-					conexionBD.Close();//Se cierra la conexión a la BD
-					puntero_1.Close();//Se cierra el puntero_1
-				}
-			}
-		}
-	}
-
     //Función que obtiene los datos de la base de datos y llena las estructuras
-	private void obtener_datos_SQLite(int tema_elegido, byte numero_de_preguntas){
+	private void obtener_datos_SQLite(int tema_elegido){
+		//Se limpian los aviones a lápiz
+		GO_fondo_1_1.SetActive(false);
+		GO_fondo_2_1.SetActive(false);
+		GO_fondo_3_1.SetActive(false);
+		GO_fondo_4_1.SetActive(false);
+		GO_fondo_5_1.SetActive(false);
+		GO_fondo_6_1.SetActive(false);
+		GO_fondo_7_1.SetActive(false);
+		GO_fondo_8_1.SetActive(false);
+		GO_fondo_9_1.SetActive(false);
+		GO_fondo_10_1.SetActive(false);
+		GO_fondo_1_2.SetActive(false);
+		GO_fondo_2_2.SetActive(false);
+		GO_fondo_3_2.SetActive(false);
+		GO_fondo_4_2.SetActive(false);
+		GO_fondo_5_2.SetActive(false);
+		GO_fondo_6_2.SetActive(false);
+		GO_fondo_7_2.SetActive(false);
+		GO_fondo_8_2.SetActive(false);
+		GO_fondo_9_2.SetActive(false);
+		GO_fondo_10_2.SetActive(false);
+		GO_fondo_1_3.SetActive(false);
+		GO_fondo_2_3.SetActive(false);
+		GO_fondo_3_3.SetActive(false);
+		GO_fondo_4_3.SetActive(false);
+		GO_fondo_5_3.SetActive(false);
+		GO_fondo_6_3.SetActive(false);
+		GO_fondo_7_3.SetActive(false);
+		GO_fondo_8_3.SetActive(false);
+		GO_fondo_9_3.SetActive(false);
+		GO_fondo_10_3.SetActive(false);
+		GO_fondo_1_4.SetActive(false);
+		GO_fondo_2_4.SetActive(false);
+		GO_fondo_3_4.SetActive(false);
+		GO_fondo_4_4.SetActive(false);
+		GO_fondo_5_4.SetActive(false);
+		GO_fondo_6_4.SetActive(false);
+		GO_fondo_7_4.SetActive(false);
+		GO_fondo_8_4.SetActive(false);
+		GO_fondo_9_4.SetActive(false);
+		GO_fondo_10_4.SetActive(false);
 		//Variables auxiliares para obtener campos de tabla "respuestas"
 		int id_pregunta = 0;
 		//--------------------------------------------------------------------------------------------------------------------
 		//-------------------------------------CONSULTA EN TABLA PREGUNTAS----------------------------------------------------
 		//--------------------------------------------------------------------------------------------------------------------
 		//Se crea conexión con Base de Datos
-		using(IDbConnection conexionBD = new SqliteConnection(BDfile)){
+		IDbConnection conexionBD = new SqliteConnection(BDfile);{
 			conexionBD.Open();//Se abre la conexión
 			//Se prepara para consulta
-			using(IDbCommand comandoBD = conexionBD.CreateCommand()){
+			IDbCommand comandoBD = conexionBD.CreateCommand();{
 				string SQL = "select * from preguntas where id_tema = "+tema_elegido.ToString()+" order by random() limit "+numero_de_preguntas.ToString();
 				comandoBD.CommandText = SQL;
 				//Leer el resultado de la consulta
-				using(puntero_preguntas = comandoBD.ExecuteReader()){
+				puntero_preguntas = comandoBD.ExecuteReader();{
 					if (puntero_preguntas.Read()){
 						//Se llenan los textos correspondientes en la escena
 						GO_titulo.GetComponent<Text>().text = "Ejercicio #1";
 						GO_pregunta.GetComponent<Text>().text = puntero_preguntas.GetString(1);
 						//--------------------------------------------------
 						tiempo_para_pregunta_actual = puntero_preguntas.GetInt32(4);
-						Debug.Log("Tiempo para esta pregunta: "+tiempo_para_pregunta_actual+" segundos");
+						//Debug.Log("Tiempo para esta pregunta: "+tiempo_para_pregunta_actual+" segundos");
 						id_pregunta = puntero_preguntas.GetInt32(0);
 						numero_de_opciones_pregunta_actual = puntero_preguntas.GetInt32(2);
 					}
@@ -372,6 +397,8 @@ public class Escena_Actividad : MonoBehaviour {
 		//--------------------------------------------------------------------------------------------------------------------
 		//-------------------------------------CONSULTA EN TABLA RESPUESTAS---------------------------------------------------
 		//--------------------------------------------------------------------------------------------------------------------
+		//Se reinicia array camino correcto
+		array_camino_correcto.Clear();
 		//Se crea conexión con Base de Datos
 		using(IDbConnection conexionBD_1 = new SqliteConnection(BDfile)){
 			conexionBD_1.Open();//Se abre la conexión
@@ -415,6 +442,15 @@ public class Escena_Actividad : MonoBehaviour {
 		                    //-------------------------------------
 		                    //-------------------------------------
 		                    //-------------------------------------
+		                    //-----------------------------------------
+		                    //-----Guardado de camino correcto---------
+		                    //-----------------------------------------
+		                    if(puntero_respuestas.GetInt32(4)==1){//Sí la respuesta es correcta
+		                    	array_camino_correcto.Add(cad_aux);
+		                    }
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    //-----------------------------------------
 		                    cad_aux = "";
 		                }
 						//------------------------
@@ -455,6 +491,15 @@ public class Escena_Actividad : MonoBehaviour {
 		                    //-------------------------------------
 		                    //-------------------------------------
 		                    //-------------------------------------
+		                    //-----------------------------------------
+		                    //-----Guardado de camino correcto---------
+		                    //-----------------------------------------
+		                    if(puntero_respuestas.GetInt32(4)==1){//Sí la respuesta es correcta
+		                    	array_camino_correcto.Add(cad_aux);
+		                    }
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    //-----------------------------------------
 		                    cad_aux = "";
 		                }
 						//------------------------
@@ -495,6 +540,15 @@ public class Escena_Actividad : MonoBehaviour {
 		                    //-------------------------------------
 		                    //-------------------------------------
 		                    //-------------------------------------
+		                    //-----------------------------------------
+		                    //-----Guardado de camino correcto---------
+		                    //-----------------------------------------
+		                    if(puntero_respuestas.GetInt32(4)==1){//Sí la respuesta es correcta
+		                    	array_camino_correcto.Add(cad_aux);
+		                    }
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    //-----------------------------------------
 		                    cad_aux = "";
 		                }
 						//------------------------
@@ -535,6 +589,15 @@ public class Escena_Actividad : MonoBehaviour {
 		                    //-------------------------------------
 		                    //-------------------------------------
 		                    //-------------------------------------
+		                    //-----------------------------------------
+		                    //-----Guardado de camino correcto---------
+		                    //-----------------------------------------
+		                    if(puntero_respuestas.GetInt32(4)==1){//Sí la respuesta es correcta
+		                    	array_camino_correcto.Add(cad_aux);
+		                    }
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    //-----------------------------------------
 		                    cad_aux = "";
 		                }
 						//------------------------
@@ -551,7 +614,305 @@ public class Escena_Actividad : MonoBehaviour {
 		//--------------------------------------------------------------------------------------------------------------------
 	}
 
+	//Función que obtiene los datos de la base de datos y llena las estructuras (EN UPDATE)
+	private void obtener_datos_SQLite_UPDATE(){
+		//Se limpian los aviones a lápiz
+		GO_fondo_1_1.SetActive(false);
+		GO_fondo_2_1.SetActive(false);
+		GO_fondo_3_1.SetActive(false);
+		GO_fondo_4_1.SetActive(false);
+		GO_fondo_5_1.SetActive(false);
+		GO_fondo_6_1.SetActive(false);
+		GO_fondo_7_1.SetActive(false);
+		GO_fondo_8_1.SetActive(false);
+		GO_fondo_9_1.SetActive(false);
+		GO_fondo_10_1.SetActive(false);
+		GO_fondo_1_2.SetActive(false);
+		GO_fondo_2_2.SetActive(false);
+		GO_fondo_3_2.SetActive(false);
+		GO_fondo_4_2.SetActive(false);
+		GO_fondo_5_2.SetActive(false);
+		GO_fondo_6_2.SetActive(false);
+		GO_fondo_7_2.SetActive(false);
+		GO_fondo_8_2.SetActive(false);
+		GO_fondo_9_2.SetActive(false);
+		GO_fondo_10_2.SetActive(false);
+		GO_fondo_1_3.SetActive(false);
+		GO_fondo_2_3.SetActive(false);
+		GO_fondo_3_3.SetActive(false);
+		GO_fondo_4_3.SetActive(false);
+		GO_fondo_5_3.SetActive(false);
+		GO_fondo_6_3.SetActive(false);
+		GO_fondo_7_3.SetActive(false);
+		GO_fondo_8_3.SetActive(false);
+		GO_fondo_9_3.SetActive(false);
+		GO_fondo_10_3.SetActive(false);
+		GO_fondo_1_4.SetActive(false);
+		GO_fondo_2_4.SetActive(false);
+		GO_fondo_3_4.SetActive(false);
+		GO_fondo_4_4.SetActive(false);
+		GO_fondo_5_4.SetActive(false);
+		GO_fondo_6_4.SetActive(false);
+		GO_fondo_7_4.SetActive(false);
+		GO_fondo_8_4.SetActive(false);
+		GO_fondo_9_4.SetActive(false);
+		GO_fondo_10_4.SetActive(false);
+		//Variables auxiliares para obtener campos de tabla "respuestas"
+		int id_pregunta = 0;
+		//--------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------CONSULTA EN TABLA PREGUNTAS----------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		if (puntero_preguntas.Read()){
+			//Se llenan los textos correspondientes en la escena
+			GO_titulo.GetComponent<Text>().text = "Ejercicio #"+pregunta_actual.ToString();
+			GO_pregunta.GetComponent<Text>().text = puntero_preguntas.GetString(1);
+			//--------------------------------------------------
+			tiempo_para_pregunta_actual = puntero_preguntas.GetInt32(4);
+			//Debug.Log("Tiempo para esta pregunta: "+tiempo_para_pregunta_actual+" segundos");
+			id_pregunta = puntero_preguntas.GetInt32(0);
+			numero_de_opciones_pregunta_actual = puntero_preguntas.GetInt32(2);
+		}
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------CONSULTA EN TABLA RESPUESTAS---------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//Se reinicia array camino correcto
+		array_camino_correcto.Clear();
+		//Se crea conexión con Base de Datos
+		using(IDbConnection conexionBD_1 = new SqliteConnection(BDfile)){
+			conexionBD_1.Open();//Se abre la conexión
+			//Se prepara para consulta
+			using(IDbCommand comandoBD_1 = conexionBD_1.CreateCommand()){
+				string SQL_1 = "select * from respuestas where id_pregunta = "+id_pregunta.ToString();
+				comandoBD_1.CommandText = SQL_1;
+				//Leer el resultado de la consulta
+				using(IDataReader puntero_respuestas = comandoBD_1.ExecuteReader()){
+					if (puntero_respuestas.Read()){
+						GO_opcion_1.GetComponent<Text>().text = "A) "+puntero_respuestas.GetString(1);
+						//------------------------
+						//Desglosar campo "camino"
+						//------------------------
+						string texto_auxiliar = puntero_respuestas.GetString(2);
+		                string cad_aux = "";//cadena auxiliar
+		                int i=0;
+		                while(i<texto_auxiliar.Length){
+		                    while( texto_auxiliar.Substring(i,1)!="°"){
+		                        cad_aux=cad_aux+texto_auxiliar.Substring(i,1);
+		                        i++;
+		                    }
+		                    i++;
+		                    //--------------------------------------
+		                    //manejo gráfico de los aviones a lápiz-
+		                    //--------------------------------------
+		                    switch (cad_aux) {
+		                    	case "1": GO_fondo_1_1.SetActive(true); break;
+		                    	case "2": GO_fondo_2_1.SetActive(true); break;
+		                    	case "3": GO_fondo_3_1.SetActive(true); break;
+		                    	case "4": GO_fondo_4_1.SetActive(true); break;
+		                    	case "5": GO_fondo_5_1.SetActive(true); break;
+		                    	case "6": GO_fondo_6_1.SetActive(true); break;
+		                    	case "7": GO_fondo_7_1.SetActive(true); break;
+		                    	case "8": GO_fondo_8_1.SetActive(true); break;
+		                    	case "9": GO_fondo_9_1.SetActive(true); break;
+		                    	case "10": GO_fondo_10_1.SetActive(true); break;
+		                    	case "4-5": GO_fondo_4_1.SetActive(true); GO_fondo_5_1.SetActive(true); break;
+		                    	case "7-8": GO_fondo_7_1.SetActive(true); GO_fondo_8_1.SetActive(true); break;
+		                    }
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-----------------------------------------
+		                    //-----Guardado de camino correcto---------
+		                    //-----------------------------------------
+		                    if(puntero_respuestas.GetInt32(4)==1){//Sí la respuesta es correcta
+		                    	array_camino_correcto.Add(cad_aux);
+		                    }
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    cad_aux = "";
+		                }
+						//------------------------
+						//------------------------
+						//------------------------
+					}
+					if (puntero_respuestas.Read()){
+						GO_opcion_2.GetComponent<Text>().text = "B) "+puntero_respuestas.GetString(1);
+						//------------------------
+						//Desglosar campo "camino"
+						//------------------------
+						string texto_auxiliar = puntero_respuestas.GetString(2);
+		                string cad_aux = "";//cadena auxiliar
+		                int i=0;
+		                while(i<texto_auxiliar.Length){
+		                    while( texto_auxiliar.Substring(i,1)!="°"){
+		                        cad_aux=cad_aux+texto_auxiliar.Substring(i,1);
+		                        i++;
+		                    }
+		                    i++;
+		                    //--------------------------------------
+		                    //manejo gráfico de los aviones a lápiz-
+		                    //--------------------------------------
+		                    switch (cad_aux) {
+		                    	case "1": GO_fondo_1_2.SetActive(true); break;
+		                    	case "2": GO_fondo_2_2.SetActive(true); break;
+		                    	case "3": GO_fondo_3_2.SetActive(true); break;
+		                    	case "4": GO_fondo_4_2.SetActive(true); break;
+		                    	case "5": GO_fondo_5_2.SetActive(true); break;
+		                    	case "6": GO_fondo_6_2.SetActive(true); break;
+		                    	case "7": GO_fondo_7_2.SetActive(true); break;
+		                    	case "8": GO_fondo_8_2.SetActive(true); break;
+		                    	case "9": GO_fondo_9_2.SetActive(true); break;
+		                    	case "10": GO_fondo_10_2.SetActive(true); break;
+		                    	case "4-5": GO_fondo_4_2.SetActive(true); GO_fondo_5_2.SetActive(true); break;
+		                    	case "7-8": GO_fondo_7_2.SetActive(true); GO_fondo_8_2.SetActive(true); break;
+		                    }
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-----------------------------------------
+		                    //-----Guardado de camino correcto---------
+		                    //-----------------------------------------
+		                    if(puntero_respuestas.GetInt32(4)==1){//Sí la respuesta es correcta
+		                    	array_camino_correcto.Add(cad_aux);
+		                    }
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    cad_aux = "";
+		                }
+						//------------------------
+						//------------------------
+						//------------------------
+					}
+					if (puntero_respuestas.Read()){
+						GO_opcion_3.GetComponent<Text>().text = "C) "+puntero_respuestas.GetString(1);
+						//------------------------
+						//Desglosar campo "camino"
+						//------------------------
+						string texto_auxiliar = puntero_respuestas.GetString(2);
+		                string cad_aux = "";//cadena auxiliar
+		                int i=0;
+		                while(i<texto_auxiliar.Length){
+		                    while( texto_auxiliar.Substring(i,1)!="°"){
+		                        cad_aux=cad_aux+texto_auxiliar.Substring(i,1);
+		                        i++;
+		                    }
+		                    i++;
+		                    //--------------------------------------
+		                    //manejo gráfico de los aviones a lápiz-
+		                    //--------------------------------------
+		                    switch (cad_aux) {
+		                    	case "1": GO_fondo_1_3.SetActive(true); break;
+		                    	case "2": GO_fondo_2_3.SetActive(true); break;
+		                    	case "3": GO_fondo_3_3.SetActive(true); break;
+		                    	case "4": GO_fondo_4_3.SetActive(true); break;
+		                    	case "5": GO_fondo_5_3.SetActive(true); break;
+		                    	case "6": GO_fondo_6_3.SetActive(true); break;
+		                    	case "7": GO_fondo_7_3.SetActive(true); break;
+		                    	case "8": GO_fondo_8_3.SetActive(true); break;
+		                    	case "9": GO_fondo_9_3.SetActive(true); break;
+		                    	case "10": GO_fondo_10_3.SetActive(true); break;
+		                    	case "4-5": GO_fondo_4_3.SetActive(true); GO_fondo_5_3.SetActive(true); break;
+		                    	case "7-8": GO_fondo_7_3.SetActive(true); GO_fondo_8_3.SetActive(true); break;
+		                    }
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-----------------------------------------
+		                    //-----Guardado de camino correcto---------
+		                    //-----------------------------------------
+		                    if(puntero_respuestas.GetInt32(4)==1){//Sí la respuesta es correcta
+		                    	array_camino_correcto.Add(cad_aux);
+		                    }
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    cad_aux = "";
+		                }
+						//------------------------
+						//------------------------
+						//------------------------
+					}
+					if (puntero_respuestas.Read()){
+						GO_opcion_4.GetComponent<Text>().text = "D) "+puntero_respuestas.GetString(1);
+						//------------------------
+						//Desglosar campo "camino"
+						//------------------------
+						string texto_auxiliar = puntero_respuestas.GetString(2);
+		                string cad_aux = "";//cadena auxiliar
+		                int i=0;
+		                while(i<texto_auxiliar.Length){
+		                    while( texto_auxiliar.Substring(i,1)!="°"){
+		                        cad_aux=cad_aux+texto_auxiliar.Substring(i,1);
+		                        i++;
+		                    }
+		                    i++;
+		                    //--------------------------------------
+		                    //manejo gráfico de los aviones a lápiz-
+		                    //--------------------------------------
+		                    switch (cad_aux) {
+		                    	case "1": GO_fondo_1_4.SetActive(true); break;
+		                    	case "2": GO_fondo_2_4.SetActive(true); break;
+		                    	case "3": GO_fondo_3_4.SetActive(true); break;
+		                    	case "4": GO_fondo_4_4.SetActive(true); break;
+		                    	case "5": GO_fondo_5_4.SetActive(true); break;
+		                    	case "6": GO_fondo_6_4.SetActive(true); break;
+		                    	case "7": GO_fondo_7_4.SetActive(true); break;
+		                    	case "8": GO_fondo_8_4.SetActive(true); break;
+		                    	case "9": GO_fondo_9_4.SetActive(true); break;
+		                    	case "10": GO_fondo_10_4.SetActive(true); break;
+		                    	case "4-5": GO_fondo_4_4.SetActive(true); GO_fondo_5_4.SetActive(true); break;
+		                    	case "7-8": GO_fondo_7_4.SetActive(true); GO_fondo_8_4.SetActive(true); break;
+		                    }
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-----------------------------------------
+		                    //-----Guardado de camino correcto---------
+		                    //-----------------------------------------
+		                    if(puntero_respuestas.GetInt32(4)==1){//Sí la respuesta es correcta
+		                    	array_camino_correcto.Add(cad_aux);
+		                    }
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    //-----------------------------------------
+		                    cad_aux = "";
+		                }
+						//------------------------
+						//------------------------
+						//------------------------
+					}
+					conexionBD_1.Close();//Se cierra la conexión a la BD
+					puntero_respuestas.Close();//Se cierra el puntero
+				}
+			}
+		}
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+	}
+
+	private void pasar_a_siguiente_pregunta () {
+		bandera_pasar_a_siguiente_pregunta = true;
+		bandera_termino_opacidad_1 = false;
+		animacion_pasando_pagina = false;
+		time_inicio_frame = 0f;
+		pregunta_actual++;
+	}
+
     void Update() {
+    	//Prueba seguiente pregunta
+    	if(pregunta_actual<numero_de_preguntas){
+    		if(Input.GetKeyUp(KeyCode.Space)){
+    			pasar_a_siguiente_pregunta();
+    		}
+    	} else {
+    		//Se llegó al final
+    	}
+    	//-------------------------
     	//-------------------------------------------------------------
     	//---------------------Estado de avión-------------------------
     	//-------------------------------------------------------------
@@ -679,12 +1040,9 @@ public class Escena_Actividad : MonoBehaviour {
     		//----------------------------------------Incrementar opacidad---------------------------------------------------
     		//---------------------------------------------------------------------------------------------------------------
     		if(!bandera_termino_opacidad){
-    		if(aux_opacidad<0.7f){
-    			aux_opacidad+=0.005f;
-    		} else {
-    			bandera_termino_opacidad = true;
-    		}
-    		GO_titulo.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
+	    		if(aux_opacidad<0.7f){
+	    			aux_opacidad+=0.01f;
+	    	GO_titulo.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
 			GO_pregunta.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
 			GO_opcion_1.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
 			GO_opcion_2.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
@@ -743,10 +1101,107 @@ public class Escena_Actividad : MonoBehaviour {
 			GO_num_8_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_8_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
 			GO_num_9_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_9_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
 			GO_num_10_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_10_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+	    		} else {
+	    			bandera_termino_opacidad = true;
+	    		}
 			}
 			//---------------------------------------------------------------------------------------------------------------
 			//---------------------------------------------------------------------------------------------------------------
 			//---------------------------------------------------------------------------------------------------------------
+			//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+			//--------------------------------------------------------------------ANIMACIÓN PASAR PÁGINA--------------------------------------------------------------------------
+			//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+			if(bandera_pasar_a_siguiente_pregunta){
+				//-------------------------
+				//Se decrementa la opacidad
+				//-------------------------
+			if(!bandera_termino_opacidad_1){
+	    		if(aux_opacidad>0f){
+	    			aux_opacidad-=0.01f;
+	    	GO_titulo.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_pregunta.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_opcion_1.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_opcion_2.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_opcion_3.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_opcion_4.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_subtitulo.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_avion_lapiz_1.GetComponent<Image>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_avion_lapiz_2.GetComponent<Image>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_avion_lapiz_3.GetComponent<Image>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_avion_lapiz_4.GetComponent<Image>().color = new Color(0f,0f,0f,aux_opacidad);
+			//Avión 1
+			GO_subtitulo_avion_1.GetComponent<Text>().color = new Color(0f,0f,0f,aux_opacidad);
+			GO_num_1_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_1_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_2_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_2_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_3_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_3_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_4_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_4_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_5_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_5_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_6_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_6_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_7_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_7_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_8_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_8_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_9_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_9_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_10_1.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_10_1.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			//Avión 2
+			GO_subtitulo_avion_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);
+			GO_num_1_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_1_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_2_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_2_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_3_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_3_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_4_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_4_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_5_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_5_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_6_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_6_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_7_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_7_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_8_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_8_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_9_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_9_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_10_2.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_10_2.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			//Avión 3
+			GO_subtitulo_avion_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);
+			GO_num_1_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_1_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_2_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_2_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_3_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_3_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_4_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_4_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_5_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_5_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_6_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_6_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_7_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_7_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_8_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_8_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_9_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_9_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_10_3.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_10_3.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			//Avión 4
+			GO_subtitulo_avion_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);
+			GO_num_1_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_1_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_2_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_2_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_3_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_3_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_4_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_4_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_5_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_5_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_6_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_6_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_7_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_7_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_8_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_8_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_9_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_9_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+			GO_num_10_4.GetComponent<Text>().color = new Color(0.19f,0.19f,0.19f,aux_opacidad);GO_fondo_10_4.GetComponent<Image>().color = new Color(0.21f,0.63f,1f,aux_opacidad);
+	    		} else {
+	    			if(!animacion_pasando_pagina){
+	    				time_inicio_frame = time_inicio_frame + 0.25f;
+	    				int index = Convert.ToInt32(time_inicio_frame);
+			        	libreta.texture = frames_pasando_pagina[index];
+			        	if(index == frames_pasando_pagina.Length-1){
+			        		animacion_pasando_pagina = true;
+			        	}
+	    			} else {
+		    			//----------------------------------------------
+		    			bandera_termino_opacidad_1 = true;
+		    			obtener_datos_SQLite_UPDATE();
+		    			bandera_termino_opacidad = false;
+		    			bandera_pasar_a_siguiente_pregunta = false;
+		    			//----------------------------------------------
+	    			}
+	    		}
+			}
+				//-------------------------
+				//-------------------------
+				//-------------------------
+			}
+			//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+			//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+			//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			//Hacer visible
 			switch (numero_de_opciones_pregunta_actual) {
 				case 1: {
