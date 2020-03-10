@@ -587,7 +587,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &100845386
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1296,7 +1296,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &294995320
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1440,7 +1440,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &300866512
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1738,7 +1738,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &337106162
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1882,7 +1882,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &365933413
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2401,7 +2401,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Ejercicio #2'
+  m_Text: 'Ejercicio #'
 --- !u!222 &472938061
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2823,7 +2823,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &510367474
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2972,7 +2972,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &531371218
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3095,7 +3095,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: C) 22
+  m_Text: "opci\xF3n 3"
 --- !u!222 &553937453
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3422,7 +3422,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &635678556
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4414,7 +4414,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &820237954
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4486,7 +4486,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &821427750
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4635,7 +4635,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &856201721
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4928,7 +4928,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &885498478
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5468,7 +5468,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1014973909
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5668,7 +5668,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: A) 32
+  m_Text: "opci\xF3n 1"
 --- !u!222 &1035632798
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5822,8 +5822,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Jos\xE9 tiene 24 a\xF1os y Ana 2/3 de esa edad. \xBFCu\xE1ntos a\xF1os
-    suman entre los dos?"
+  m_Text: texto de la pregunta
 --- !u!222 &1078464271
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6223,7 +6222,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: B) 40
+  m_Text: "opci\xF3n 2"
 --- !u!222 &1180735314
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6936,7 +6935,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1397739223
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7008,7 +7007,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1409829186
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7717,6 +7716,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa9fb795aadbf8b41850bb6305d93dcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  modo_prueba: 1
+  pie_1: {fileID: 103963920}
+  pie_2: {fileID: 271509005}
+  pie_3: {fileID: 430026828}
+  pie_4: {fileID: 1636126764}
+  pie_5: {fileID: 756127244}
+  pie_6: {fileID: 1096403651}
+  pie_7: {fileID: 2124904629}
+  pie_8: {fileID: 27499160}
+  pie_9: {fileID: 2101258053}
+  pie_10: {fileID: 186476760}
   texto_logo: {fileID: 468554917}
   fracciones_logo: {fileID: 295255194}
   multiplicaciones_logo: {fileID: 895878230}
@@ -7931,7 +7941,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1578731710
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8003,7 +8013,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1589352536
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8198,7 +8208,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: D) 30
+  m_Text: "opci\xF3n 4"
 --- !u!222 &1610019966
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -8224,7 +8234,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1610724231
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8764,7 +8774,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1852886337
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8985,7 +8995,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1880136534
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9365,7 +9375,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1919115165
 RectTransform:
   m_ObjectHideFlags: 0

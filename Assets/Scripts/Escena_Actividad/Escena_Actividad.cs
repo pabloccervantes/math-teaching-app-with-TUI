@@ -1,10 +1,67 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System;
+using System.IO;
+using System.Linq;
+using InTheHand.Devices.Bluetooth;
+using InTheHand.Devices.Bluetooth.Rfcomm;
+using InTheHand.Devices.Enumeration;
+using System.Data;
+using Mono.Data.Sqlite;
 
 public class Escena_Actividad : MonoBehaviour {
 
+	public bool modo_prueba;
+	//--------------------------------------------------------
+	//-----------Variables Base de Datos SQLite---------------
+	//--------------------------------------------------------
+	private string BDfile;
+	private IDataReader puntero_preguntas;
+	//--------------------------------------------------------
+	//--------------------------------------------------------
+	//--------------------------------------------------------
+	//--------------------------------------------------------
+    //-----------Variables de control Bluetooth---------------
+    //--------------------------------------------------------
+    private bool bandera_cambio_de_linea = false;
+    private bool[] estado_botones = new bool[10];
+    private Stream _Stream;
+    private byte contador_array_estado_botones = 0;
+    private bool bandera_sincronizacion = true;
+    //---------------Control botones--------------------
+    private bool bandera_control_boton_1 = false;
+    private bool bandera_control_boton_2 = false;
+    private bool bandera_control_boton_3 = false;
+    private bool bandera_control_boton_4 = false;
+    private bool bandera_control_boton_5 = false;
+    private bool bandera_control_boton_6 = false;
+    private bool bandera_control_boton_7 = false;
+    private bool bandera_control_boton_8 = false;
+    private bool bandera_control_boton_9 = false;
+    private bool bandera_control_boton_10 = false;
+    //--------------------------------------------------
+    //--------------------------------------------------------
+    //--------------------------------------------------------
+    //--------------------------------------------------------
+    //-----------------
+    //Pisadas del avión
+    //-----------------
+    public GameObject pie_1;
+    public GameObject pie_2;
+    public GameObject pie_3;
+    public GameObject pie_4;
+    public GameObject pie_5;
+    public GameObject pie_6;
+    public GameObject pie_7;
+    public GameObject pie_8;
+    public GameObject pie_9;
+    public GameObject pie_10;
+    //-----------------
+    //-----------------
+    //-----------------
 	//---------------------------------------------
 	//--------------Tema a mostrar-----------------
 	//---------------------------------------------
@@ -130,8 +187,53 @@ public class Escena_Actividad : MonoBehaviour {
     //-------------------------------------------------------------
     //-------------------------------------------------------------
     //-------------------------------------------------------------
+    //-------------------------------------------------------------
+    //-----------------Variables de control------------------------
+    //-------------------------------------------------------------
+    private byte pregunta_actual = 1;
+    private string[] array_camino_correcto;
+    private int tiempo_para_pregunta_actual = 0;
+    private int numero_de_opciones_pregunta_actual = 0;
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
 
     void Start() {
+    	//--------------------------------------------------------
+		//----------------Base de Datos SQLite--------------------
+		//--------------------------------------------------------
+		BDfile = "URI=file:" + Application.dataPath + "/BD/BD_Avion.sqlite";
+		byte numero_de_preguntas = 0;
+		switch(PlayerPrefs.GetInt("num_preguntas")){
+			case 1: numero_de_preguntas = 1; break;
+			case 2: numero_de_preguntas = 3; break;
+			case 3: numero_de_preguntas = 5; break;
+			case 4: numero_de_preguntas = 10; break;
+		}
+		obtener_datos_SQLite(PlayerPrefs.GetInt("seleccion_de_tema"),numero_de_preguntas);
+		//--------------------------------------------------------
+		//--------------------------------------------------------
+		//--------------------------------------------------------
+    	//---------------------------------------------------------------------------------------------------------------------------------
+    	//------------------------------Sí modo prueba está activado no se inicia con conexión Bluetooth-----------------------------------
+    	//---------------------------------------------------------------------------------------------------------------------------------
+        if(!modo_prueba){
+        //---------------------------------------------------------------------------------------------------------------------------------
+        //--------------------------------------------------Control de bluetooth-----------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------
+        /* Elegir el dispositivo */
+        var deviceInformation = PickDevice();
+        if(deviceInformation == null){ throw new InvalidDataException("Error al recibir información del dispositivo: Verifique conexión");}
+        /* Abrir el serial-port stream */
+        _Stream = OpenBluetoothStream(deviceInformation, RfcommServiceId.SerialPort);
+        if(_Stream == null) {throw new InvalidDataException("Fallo al iniciar Stream: Servicio no diponible"); }
+        //---------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------
+        }
+        //---------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------
     	//----------------------------------------------------------
         //-----------Animación movimiento del fondo-----------------
         //----------------------------------------------------------
@@ -213,8 +315,332 @@ public class Escena_Actividad : MonoBehaviour {
 		//----------------------------------------------------------
     }
 
+    //Función de prueba SQLite
+	private void prueba_SQLite(){
+		//Se crea conexión con Base de Datos
+		using(IDbConnection conexionBD = new SqliteConnection(BDfile)){
+			conexionBD.Open();//Se abre la conexión
+			//Se prepara para consulta
+			using(IDbCommand comandoBD = conexionBD.CreateCommand()){
+				string SQL = "SELECT texto_pregunta FROM preguntas WHERE id_tema = 1";
+				comandoBD.CommandText = SQL;
+				//Leer el resultado de la consulta
+				using(IDataReader puntero_1 = comandoBD.ExecuteReader()){
+					while (puntero_1.Read()){
+						Debug.Log(puntero_1.GetString(0));
+						//Debug.Log("tiempo en segundos: "+puntero_1.GetInt32(0));
+					}
+					conexionBD.Close();//Se cierra la conexión a la BD
+					puntero_1.Close();//Se cierra el puntero_1
+				}
+			}
+		}
+	}
+
+    //Función que obtiene los datos de la base de datos y llena las estructuras
+	private void obtener_datos_SQLite(int tema_elegido, byte numero_de_preguntas){
+		//Variables auxiliares para obtener campos de tabla "respuestas"
+		int id_pregunta = 0;
+		//--------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------CONSULTA EN TABLA PREGUNTAS----------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//Se crea conexión con Base de Datos
+		using(IDbConnection conexionBD = new SqliteConnection(BDfile)){
+			conexionBD.Open();//Se abre la conexión
+			//Se prepara para consulta
+			using(IDbCommand comandoBD = conexionBD.CreateCommand()){
+				string SQL = "select * from preguntas where id_tema = "+tema_elegido.ToString()+" order by random() limit "+numero_de_preguntas.ToString();
+				comandoBD.CommandText = SQL;
+				//Leer el resultado de la consulta
+				using(puntero_preguntas = comandoBD.ExecuteReader()){
+					if (puntero_preguntas.Read()){
+						//Se llenan los textos correspondientes en la escena
+						GO_titulo.GetComponent<Text>().text = "Ejercicio #1";
+						GO_pregunta.GetComponent<Text>().text = puntero_preguntas.GetString(1);
+						//--------------------------------------------------
+						tiempo_para_pregunta_actual = puntero_preguntas.GetInt32(4);
+						Debug.Log("Tiempo para esta pregunta: "+tiempo_para_pregunta_actual+" segundos");
+						id_pregunta = puntero_preguntas.GetInt32(0);
+						numero_de_opciones_pregunta_actual = puntero_preguntas.GetInt32(2);
+					}
+				}
+			}
+		}
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------CONSULTA EN TABLA RESPUESTAS---------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//Se crea conexión con Base de Datos
+		using(IDbConnection conexionBD_1 = new SqliteConnection(BDfile)){
+			conexionBD_1.Open();//Se abre la conexión
+			//Se prepara para consulta
+			using(IDbCommand comandoBD_1 = conexionBD_1.CreateCommand()){
+				string SQL_1 = "select * from respuestas where id_pregunta = "+id_pregunta.ToString();
+				comandoBD_1.CommandText = SQL_1;
+				//Leer el resultado de la consulta
+				using(IDataReader puntero_respuestas = comandoBD_1.ExecuteReader()){
+					if (puntero_respuestas.Read()){
+						GO_opcion_1.GetComponent<Text>().text = "A) "+puntero_respuestas.GetString(1);
+						//------------------------
+						//Desglosar campo "camino"
+						//------------------------
+						string texto_auxiliar = puntero_respuestas.GetString(2);
+		                string cad_aux = "";//cadena auxiliar
+		                int i=0;
+		                while(i<texto_auxiliar.Length){
+		                    while( texto_auxiliar.Substring(i,1)!="°"){
+		                        cad_aux=cad_aux+texto_auxiliar.Substring(i,1);
+		                        i++;
+		                    }
+		                    i++;
+		                    //--------------------------------------
+		                    //manejo gráfico de los aviones a lápiz-
+		                    //--------------------------------------
+		                    switch (cad_aux) {
+		                    	case "1": GO_fondo_1_1.SetActive(true); break;
+		                    	case "2": GO_fondo_2_1.SetActive(true); break;
+		                    	case "3": GO_fondo_3_1.SetActive(true); break;
+		                    	case "4": GO_fondo_4_1.SetActive(true); break;
+		                    	case "5": GO_fondo_5_1.SetActive(true); break;
+		                    	case "6": GO_fondo_6_1.SetActive(true); break;
+		                    	case "7": GO_fondo_7_1.SetActive(true); break;
+		                    	case "8": GO_fondo_8_1.SetActive(true); break;
+		                    	case "9": GO_fondo_9_1.SetActive(true); break;
+		                    	case "10": GO_fondo_10_1.SetActive(true); break;
+		                    	case "4-5": GO_fondo_4_1.SetActive(true); GO_fondo_5_1.SetActive(true); break;
+		                    	case "7-8": GO_fondo_7_1.SetActive(true); GO_fondo_8_1.SetActive(true); break;
+		                    }
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    cad_aux = "";
+		                }
+						//------------------------
+						//------------------------
+						//------------------------
+					}
+					if (puntero_respuestas.Read()){
+						GO_opcion_2.GetComponent<Text>().text = "B) "+puntero_respuestas.GetString(1);
+						//------------------------
+						//Desglosar campo "camino"
+						//------------------------
+						string texto_auxiliar = puntero_respuestas.GetString(2);
+		                string cad_aux = "";//cadena auxiliar
+		                int i=0;
+		                while(i<texto_auxiliar.Length){
+		                    while( texto_auxiliar.Substring(i,1)!="°"){
+		                        cad_aux=cad_aux+texto_auxiliar.Substring(i,1);
+		                        i++;
+		                    }
+		                    i++;
+		                    //--------------------------------------
+		                    //manejo gráfico de los aviones a lápiz-
+		                    //--------------------------------------
+		                    switch (cad_aux) {
+		                    	case "1": GO_fondo_1_2.SetActive(true); break;
+		                    	case "2": GO_fondo_2_2.SetActive(true); break;
+		                    	case "3": GO_fondo_3_2.SetActive(true); break;
+		                    	case "4": GO_fondo_4_2.SetActive(true); break;
+		                    	case "5": GO_fondo_5_2.SetActive(true); break;
+		                    	case "6": GO_fondo_6_2.SetActive(true); break;
+		                    	case "7": GO_fondo_7_2.SetActive(true); break;
+		                    	case "8": GO_fondo_8_2.SetActive(true); break;
+		                    	case "9": GO_fondo_9_2.SetActive(true); break;
+		                    	case "10": GO_fondo_10_2.SetActive(true); break;
+		                    	case "4-5": GO_fondo_4_2.SetActive(true); GO_fondo_5_2.SetActive(true); break;
+		                    	case "7-8": GO_fondo_7_2.SetActive(true); GO_fondo_8_2.SetActive(true); break;
+		                    }
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    cad_aux = "";
+		                }
+						//------------------------
+						//------------------------
+						//------------------------
+					}
+					if (puntero_respuestas.Read()){
+						GO_opcion_3.GetComponent<Text>().text = "C) "+puntero_respuestas.GetString(1);
+						//------------------------
+						//Desglosar campo "camino"
+						//------------------------
+						string texto_auxiliar = puntero_respuestas.GetString(2);
+		                string cad_aux = "";//cadena auxiliar
+		                int i=0;
+		                while(i<texto_auxiliar.Length){
+		                    while( texto_auxiliar.Substring(i,1)!="°"){
+		                        cad_aux=cad_aux+texto_auxiliar.Substring(i,1);
+		                        i++;
+		                    }
+		                    i++;
+		                    //--------------------------------------
+		                    //manejo gráfico de los aviones a lápiz-
+		                    //--------------------------------------
+		                    switch (cad_aux) {
+		                    	case "1": GO_fondo_1_3.SetActive(true); break;
+		                    	case "2": GO_fondo_2_3.SetActive(true); break;
+		                    	case "3": GO_fondo_3_3.SetActive(true); break;
+		                    	case "4": GO_fondo_4_3.SetActive(true); break;
+		                    	case "5": GO_fondo_5_3.SetActive(true); break;
+		                    	case "6": GO_fondo_6_3.SetActive(true); break;
+		                    	case "7": GO_fondo_7_3.SetActive(true); break;
+		                    	case "8": GO_fondo_8_3.SetActive(true); break;
+		                    	case "9": GO_fondo_9_3.SetActive(true); break;
+		                    	case "10": GO_fondo_10_3.SetActive(true); break;
+		                    	case "4-5": GO_fondo_4_3.SetActive(true); GO_fondo_5_3.SetActive(true); break;
+		                    	case "7-8": GO_fondo_7_3.SetActive(true); GO_fondo_8_3.SetActive(true); break;
+		                    }
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    cad_aux = "";
+		                }
+						//------------------------
+						//------------------------
+						//------------------------
+					}
+					if (puntero_respuestas.Read()){
+						GO_opcion_4.GetComponent<Text>().text = "D) "+puntero_respuestas.GetString(1);
+						//------------------------
+						//Desglosar campo "camino"
+						//------------------------
+						string texto_auxiliar = puntero_respuestas.GetString(2);
+		                string cad_aux = "";//cadena auxiliar
+		                int i=0;
+		                while(i<texto_auxiliar.Length){
+		                    while( texto_auxiliar.Substring(i,1)!="°"){
+		                        cad_aux=cad_aux+texto_auxiliar.Substring(i,1);
+		                        i++;
+		                    }
+		                    i++;
+		                    //--------------------------------------
+		                    //manejo gráfico de los aviones a lápiz-
+		                    //--------------------------------------
+		                    switch (cad_aux) {
+		                    	case "1": GO_fondo_1_4.SetActive(true); break;
+		                    	case "2": GO_fondo_2_4.SetActive(true); break;
+		                    	case "3": GO_fondo_3_4.SetActive(true); break;
+		                    	case "4": GO_fondo_4_4.SetActive(true); break;
+		                    	case "5": GO_fondo_5_4.SetActive(true); break;
+		                    	case "6": GO_fondo_6_4.SetActive(true); break;
+		                    	case "7": GO_fondo_7_4.SetActive(true); break;
+		                    	case "8": GO_fondo_8_4.SetActive(true); break;
+		                    	case "9": GO_fondo_9_4.SetActive(true); break;
+		                    	case "10": GO_fondo_10_4.SetActive(true); break;
+		                    	case "4-5": GO_fondo_4_4.SetActive(true); GO_fondo_5_4.SetActive(true); break;
+		                    	case "7-8": GO_fondo_7_4.SetActive(true); GO_fondo_8_4.SetActive(true); break;
+		                    }
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    //-------------------------------------
+		                    cad_aux = "";
+		                }
+						//------------------------
+						//------------------------
+						//------------------------
+					}
+					conexionBD_1.Close();//Se cierra la conexión a la BD
+					puntero_respuestas.Close();//Se cierra el puntero
+				}
+			}
+		}
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------
+	}
 
     void Update() {
+    	//-------------------------------------------------------------
+    	//---------------------Estado de avión-------------------------
+    	//-------------------------------------------------------------
+        if(!modo_prueba){//Sí modo prueba está activado no se recibe por Bluetooth
+        	estado_avion();
+        	//------------------------------------------------------------------------
+        	//Se visualiza gráficamente que botones del avión están siendo presionados
+        	//------------------------------------------------------------------------
+        	pie_1.SetActive(bandera_control_boton_1);
+        	pie_2.SetActive(bandera_control_boton_2);
+        	pie_3.SetActive(bandera_control_boton_3);
+        	pie_4.SetActive(bandera_control_boton_4);
+        	pie_5.SetActive(bandera_control_boton_5);
+        	pie_6.SetActive(bandera_control_boton_6);
+        	pie_7.SetActive(bandera_control_boton_7);
+        	pie_8.SetActive(bandera_control_boton_8);
+        	pie_9.SetActive(bandera_control_boton_9);
+        	pie_10.SetActive(bandera_control_boton_10);
+        	//------------------------------------------------------------------------
+        	//------------------------------------------------------------------------
+        	//------------------------------------------------------------------------
+        } else {
+        	//Sí se está en modo prueba - el manejo es por teclado
+        	if (Input.GetKey(KeyCode.Keypad1)) {
+        		bandera_control_boton_1 = true;
+        	} else {
+        		bandera_control_boton_1 = false;
+        	}
+        	if (Input.GetKey(KeyCode.Keypad2)) {
+        		bandera_control_boton_2 = true;
+        	} else {
+        		bandera_control_boton_2 = false;
+        	}
+        	if (Input.GetKey(KeyCode.Keypad3)) {
+        		bandera_control_boton_3 = true;
+        	} else {
+        		bandera_control_boton_3 = false;
+        	}
+        	if (Input.GetKey(KeyCode.Keypad4)) {
+        		bandera_control_boton_4 = true;
+        	} else {
+        		bandera_control_boton_4 = false;
+        	}
+        	if (Input.GetKey(KeyCode.Keypad5)) {
+        		bandera_control_boton_5 = true;
+        	} else {
+        		bandera_control_boton_5 = false;
+        	}
+        	if (Input.GetKey(KeyCode.Keypad6)) {
+        		bandera_control_boton_6 = true;
+        	} else {
+        		bandera_control_boton_6 = false;
+        	}
+        	if (Input.GetKey(KeyCode.Keypad7)) {
+        		bandera_control_boton_7 = true;
+        	} else {
+        		bandera_control_boton_7 = false;
+        	}
+        	if (Input.GetKey(KeyCode.Keypad8)) {
+        		bandera_control_boton_8 = true;
+        	} else {
+        		bandera_control_boton_8 = false;
+        	}
+        	if (Input.GetKey(KeyCode.Keypad9)) {
+        		bandera_control_boton_9 = true;
+        	} else {
+        		bandera_control_boton_9 = false;
+        	}
+        	if (Input.GetKey(KeyCode.Keypad0)) {
+        		bandera_control_boton_10 = true;
+        	} else {
+        		bandera_control_boton_10 = false;
+        	}
+        	//----------------------------------------------------
+        	pie_1.SetActive(bandera_control_boton_1);
+        	pie_2.SetActive(bandera_control_boton_2);
+        	pie_3.SetActive(bandera_control_boton_3);
+        	pie_4.SetActive(bandera_control_boton_4);
+        	pie_5.SetActive(bandera_control_boton_5);
+        	pie_6.SetActive(bandera_control_boton_6);
+        	pie_7.SetActive(bandera_control_boton_7);
+        	pie_8.SetActive(bandera_control_boton_8);
+        	pie_9.SetActive(bandera_control_boton_9);
+        	pie_10.SetActive(bandera_control_boton_10);
+        	//----------------------------------------------------
+        }
+    	//-------------------------------------------------------------
+    	//-------------------------------------------------------------
+    	//-------------------------------------------------------------
     	//-------------------------------------------------------------
         //-------------------Movimieto del fondo-----------------------
         //-------------------------------------------------------------
@@ -322,17 +748,52 @@ public class Escena_Actividad : MonoBehaviour {
 			//---------------------------------------------------------------------------------------------------------------
 			//---------------------------------------------------------------------------------------------------------------
 			//Hacer visible
+			switch (numero_de_opciones_pregunta_actual) {
+				case 1: {
+					GO_opcion_1.SetActive(true);
+					GO_opcion_2.SetActive(false);
+					GO_opcion_3.SetActive(false);
+					GO_opcion_4.SetActive(false);
+					GO_avion_lapiz_1.SetActive(true);
+					GO_avion_lapiz_2.SetActive(false);
+					GO_avion_lapiz_3.SetActive(false);
+					GO_avion_lapiz_4.SetActive(false);
+					break;}
+				case 2: {
+					GO_opcion_1.SetActive(true);
+					GO_opcion_2.SetActive(true);
+					GO_opcion_3.SetActive(false);
+					GO_opcion_4.SetActive(false);
+					GO_avion_lapiz_1.SetActive(true);
+					GO_avion_lapiz_2.SetActive(true);
+					GO_avion_lapiz_3.SetActive(false);
+					GO_avion_lapiz_4.SetActive(false);
+					break;}
+				case 3: {
+					GO_opcion_1.SetActive(true);
+					GO_opcion_2.SetActive(true);
+					GO_opcion_3.SetActive(true);
+					GO_opcion_4.SetActive(false);
+					GO_avion_lapiz_1.SetActive(true);
+					GO_avion_lapiz_2.SetActive(true);
+					GO_avion_lapiz_3.SetActive(true);
+					GO_avion_lapiz_4.SetActive(false);
+					break;}
+				case 4: {
+					GO_opcion_1.SetActive(true);
+					GO_opcion_2.SetActive(true);
+					GO_opcion_3.SetActive(true);
+					GO_opcion_4.SetActive(true);
+					GO_avion_lapiz_1.SetActive(true);
+					GO_avion_lapiz_2.SetActive(true);
+					GO_avion_lapiz_3.SetActive(true);
+					GO_avion_lapiz_4.SetActive(true);
+					break;}
+			}
     		GO_titulo.SetActive(true);
 			GO_pregunta.SetActive(true);
-			GO_opcion_1.SetActive(true);
-			GO_opcion_2.SetActive(true);
-			GO_opcion_3.SetActive(true);
-			GO_opcion_4.SetActive(true);
 			GO_subtitulo.SetActive(true);
-			GO_avion_lapiz_1.SetActive(true);
-			GO_avion_lapiz_2.SetActive(true);
-			GO_avion_lapiz_3.SetActive(true);
-			GO_avion_lapiz_4.SetActive(true);
+			
 			//----------------------------------------
 			//----------------------------------------
     	}
@@ -362,4 +823,223 @@ public class Escena_Actividad : MonoBehaviour {
     	//-----------------------------------------------------------------------
     	//-----------------------------------------------------------------------
     }//fin update
+
+    //Verifica cuáles son los botones presionados en el avión
+    private void estado_avion () {
+    		//-----------------------------------------------------------------------------------------
+            //-----------------------------------Control de Bluetooth----------------------------------
+            //-----------------------------------------------------------------------------------------
+            //Si el Stream está cerrado
+            if (_Stream == null) { 
+                throw new InvalidDataException("Conexión fallida"); 
+            } else {
+                var buffer = new byte[1];//buffer
+                int read = _Stream.Read(buffer, 0, 1);//Se hace lectura del stream
+                //Sí es la primera vez que se ejecuta
+                if(bandera_sincronizacion){
+                    //Sí se recibió algo
+                    if(read != 0){
+                        //Si se recibe el cambio de línea
+                        if(System.Text.Encoding.UTF8.GetString(buffer) == "\n") {
+                            bandera_sincronizacion = false;
+                        }
+                    }
+                } else {
+                    //Sí se recibió algo
+                    if (read != 0) {
+                        //Sí la bandera está encendida entonces se apaga
+                        if(bandera_cambio_de_linea){
+                            bandera_cambio_de_linea =false;
+                            contador_array_estado_botones = 0;
+                        }
+                        //Sí lo que recive es diferente al retorno de carro y cambio de línea
+                        if(buffer[0]!=13 && buffer[0]!=10) {
+                            //Debug.Log("Se recibió: " +  System.Text.Encoding.UTF8.GetString(buffer));
+                            if(contador_array_estado_botones<10){
+                                if(System.Text.Encoding.UTF8.GetString(buffer) == "1"){
+                                    estado_botones[contador_array_estado_botones] = true;
+                                    contador_array_estado_botones++;
+                                } else {
+                                    estado_botones[contador_array_estado_botones] = false;
+                                    contador_array_estado_botones++;
+                                }
+                            }
+                        }
+                        //Si se recibe el cambio de línea
+                        if(System.Text.Encoding.UTF8.GetString(buffer) == "\n") {
+                            //Debug.Log("cambio de linea");
+                            bandera_cambio_de_linea = true;
+                        }
+                    }
+                }
+            }
+             //----------------------Sí ya se recibió cadena completa----------------------------------
+            if(bandera_cambio_de_linea){
+                //-------CASO BOTÓN 1---------
+                if(estado_botones[0]){
+                    if(!bandera_control_boton_1){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_1 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_1){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_1 = false;
+                    }
+                }
+                //----------------------------
+                //-------CASO BOTÓN 2---------
+                if(estado_botones[1]){
+                    if(!bandera_control_boton_2){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_2 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_2){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_2 = false;
+                    }
+                }
+                //----------------------------
+                //-------CASO BOTÓN 3---------
+                if(estado_botones[2]){
+                    if(!bandera_control_boton_3){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_3 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_3){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_3 = false;
+                    }
+                }
+                //----------------------------
+                //-------CASO BOTÓN 4---------
+                if(estado_botones[3]){
+                    if(!bandera_control_boton_4){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_4 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_4){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_4 = false;
+                    }
+                }
+                //----------------------------
+                //-------CASO BOTÓN 5---------
+                if(estado_botones[4]){
+                    if(!bandera_control_boton_5){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_5 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_5){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_5 = false;
+                    }
+                }
+                //----------------------------
+                //-------CASO BOTÓN 6---------
+                if(estado_botones[5]){
+                    if(!bandera_control_boton_6){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_6 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_6){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_6 = false;
+                    }
+                }
+                //----------------------------
+                //-------CASO BOTÓN 7---------
+                if(estado_botones[6]){
+                    if(!bandera_control_boton_7){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_7 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_7){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_7 = false;
+                    }
+                }
+                //----------------------------
+                //-------CASO BOTÓN 8---------
+                if(estado_botones[7]){
+                    if(!bandera_control_boton_8){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_8 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_8){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_8 = false;
+                    }
+                }
+                //----------------------------
+                //-------CASO BOTÓN 9---------
+                if(estado_botones[8]){
+                    if(!bandera_control_boton_9){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_9 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_9){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_9 = false;
+                    }
+                }
+                //----------------------------
+                //-------CASO BOTÓN 10---------
+                if(estado_botones[9]){
+                    if(!bandera_control_boton_10){
+                    	//El botón está siendo presionado
+                        bandera_control_boton_10 = true;
+                    }
+                } else {
+                    if(bandera_control_boton_10){
+                        //el botón fue presionado - ya se soltó
+                        bandera_control_boton_10 = false;
+                    }
+                }
+                //----------------------------
+            }
+            //-----------------------------------------------------------------------------------------
+            //-----------------------------------------------------------------------------------------
+            //-----------------------------------------------------------------------------------------
+            //-----------------------------------------------------------------------------------------
+    }
+
+    //Abre stream por bluetooth
+    private static Stream OpenBluetoothStream(DeviceInformation deviceInformation, RfcommServiceId serviceId) {
+        /* Obstener servicio de dispositivo seleccionado */
+        var device = BluetoothDevice.FromDeviceInformation(deviceInformation);
+        var result = device.GetRfcommServices(BluetoothCacheMode.Cached);
+        var services = result.Services;
+        /* Búsqueda y apertura de conexión */
+        for (int i = 0; i < services.Count; ++i) {
+            var current = services[i];
+            if (current.ServiceId == serviceId) {
+                return current.OpenStream();
+            }
+        }
+        /* Sí no se logra conexión */
+        return null;
+    }
+
+    //Obtener información de dipositivo
+    private static DeviceInformation PickDevice() {
+        /* Abrir seleccionador de dispositivo */
+        var picker = new DevicePicker();
+        var deviceInfo = picker.PickSingleDevice();
+        return deviceInfo;
+    }
+
+    //Búsqueda de dispositivos que soporten el servicio
+    private DeviceInformation[] FindAll(RfcommServiceId serviceId) {
+        return DeviceInformation.FindAll(RfcommDeviceService.GetDeviceSelector(serviceId)).ToArray();
+    }
+
 }
