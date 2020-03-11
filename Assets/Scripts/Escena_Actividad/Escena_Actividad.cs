@@ -60,8 +60,30 @@ public class Escena_Actividad : MonoBehaviour {
     public GameObject pie_9;
     public GameObject pie_10;
     //-----------------
+    private bool acceso_bloqueado_1 = false;
+    private bool acceso_bloqueado_2 = false;
+    private bool acceso_bloqueado_3 = false;
+    private bool acceso_bloqueado_4 = false;
+    private bool acceso_bloqueado_5 = false;
+    private bool acceso_bloqueado_6 = false;
+    private bool acceso_bloqueado_7 = false;
+    private bool acceso_bloqueado_8 = false;
+    private bool acceso_bloqueado_9 = false;
+    private bool acceso_bloqueado_10 = false;
+    private bool acceso_bloqueado_11 = false;
+    private bool acceso_bloqueado_12 = false;
     //-----------------
     //-----------------
+    //-----------------
+    //-------------------
+    //Manejo de respuesta
+    //-------------------
+    public Image barra_progreso_respuesta;
+    private int estado_de_la_respuesta = 1;
+    private int nodos_de_la_respuesta;
+    //-------------------
+    //-------------------
+    //-------------------
 	//---------------------------------------------
 	//--------------Tema a mostrar-----------------
 	//---------------------------------------------
@@ -188,6 +210,7 @@ public class Escena_Actividad : MonoBehaviour {
 	public GameObject vida_3;
 	public GameObject vida_4;
 	public GameObject vida_5;
+	private byte vidas_actuales = 5;
     //-------------------------------------------------------------
     //-------------------------------------------------------------
     //-------------------------------------------------------------
@@ -216,7 +239,8 @@ public class Escena_Actividad : MonoBehaviour {
 			case 4: numero_de_preguntas = 10; break;
 		}
 		obtener_datos_SQLite(PlayerPrefs.GetInt("seleccion_de_tema"));
-		//array_camino_correcto.ForEach(el => Debug.Log(el));//Se imprime array camino correcto
+		nodos_de_la_respuesta = array_camino_correcto.Count;
+		barra_progreso_respuesta.fillAmount = 0f;
 		//--------------------------------------------------------
 		//--------------------------------------------------------
 		//--------------------------------------------------------
@@ -901,17 +925,11 @@ public class Escena_Actividad : MonoBehaviour {
 		animacion_pasando_pagina = false;
 		time_inicio_frame = 0f;
 		pregunta_actual++;
+		estado_de_la_respuesta = 1;
+		barra_progreso_respuesta.fillAmount = 0f;
 	}
 
     void Update() {
-    	//Prueba seguiente pregunta
-    	if(pregunta_actual<numero_de_preguntas){
-    		if(Input.GetKeyUp(KeyCode.Space)){
-    			pasar_a_siguiente_pregunta();
-    		}
-    	} else {
-    		//Se llegó al final
-    	}
     	//-------------------------
     	//-------------------------------------------------------------
     	//---------------------Estado de avión-------------------------
@@ -1002,6 +1020,505 @@ public class Escena_Actividad : MonoBehaviour {
     	//-------------------------------------------------------------
     	//-------------------------------------------------------------
     	//-------------------------------------------------------------
+    	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+    	//------------------------------------------------------------MANEJO DE RESPUESTA---------------------------------------------------------------------------
+    	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+    	if(!bandera_pasar_a_siguiente_pregunta && bandera_termino_opacidad){
+    		//Sí se está en el primer nodo de la respuesta
+    		if(estado_de_la_respuesta == 1){
+    			//
+    		}
+    		if(estado_de_la_respuesta <= nodos_de_la_respuesta){
+    			//----------------------------------------------------------
+    			//----------------------------------------------------------
+    			//----------------------------------------------------------
+    			if(bandera_control_boton_1 && !acceso_bloqueado_1){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "1"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					//Sí el botón pisado es el incorrecto
+    					estado_de_la_respuesta = 1;
+    					barra_progreso_respuesta.fillAmount = 0f;
+    					if(vidas_actuales>1){
+    						vidas_actuales--;
+    						switch (vidas_actuales) {
+    							case 1: vida_1.SetActive(true);
+    									vida_2.SetActive(false);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 2: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 3: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 4: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(true);
+    									vida_5.SetActive(false); 
+    									break;
+    						}
+    					} else {
+    						//Se acabaron las vidas
+    					}
+    				}
+    				acceso_bloqueado_1 = true;
+    			}
+    			if(bandera_control_boton_2 && !acceso_bloqueado_2){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "2"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					//Sí el botón pisado es el incorrecto
+    					estado_de_la_respuesta = 1;
+    					barra_progreso_respuesta.fillAmount = 0f;
+    					if(vidas_actuales>1){
+    						vidas_actuales--;
+    						switch (vidas_actuales) {
+    							case 1: vida_1.SetActive(true);
+    									vida_2.SetActive(false);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 2: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 3: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 4: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(true);
+    									vida_5.SetActive(false); 
+    									break;
+    						}
+    					} else {
+    						//Se acabaron las vidas
+    					}
+    				}
+    				acceso_bloqueado_2 = true;
+    			}
+    			if(bandera_control_boton_3 && !acceso_bloqueado_3){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "3"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					//Sí el botón pisado es el incorrecto
+    					estado_de_la_respuesta = 1;
+    					barra_progreso_respuesta.fillAmount = 0f;
+    					if(vidas_actuales>1){
+    						vidas_actuales--;
+    						switch (vidas_actuales) {
+    							case 1: vida_1.SetActive(true);
+    									vida_2.SetActive(false);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 2: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 3: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 4: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(true);
+    									vida_5.SetActive(false); 
+    									break;
+    						}
+    					} else {
+    						//Se acabaron las vidas
+    					}
+    				}
+    				acceso_bloqueado_3 = true;
+    			}
+    			if(bandera_control_boton_4 && !acceso_bloqueado_4){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "4"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					if(array_camino_correcto[estado_de_la_respuesta-1] == "4-5"){
+	    					//Se espera a que ambos números se pisen
+	    				} else {
+	    					//Sí el botón pisado es el incorrecto
+	    					estado_de_la_respuesta = 1;
+	    					barra_progreso_respuesta.fillAmount = 0f;
+	    					if(vidas_actuales>1){
+	    						vidas_actuales--;
+	    						switch (vidas_actuales) {
+	    							case 1: vida_1.SetActive(true);
+	    									vida_2.SetActive(false);
+	    									vida_3.SetActive(false);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 2: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(false);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 3: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(true);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 4: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(true);
+	    									vida_4.SetActive(true);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    						}
+	    					} else {
+	    						//Se acabaron las vidas
+	    					}
+	    				}
+    				}
+    				acceso_bloqueado_4 = true;
+    			}
+    			if(bandera_control_boton_5 && !acceso_bloqueado_5){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "5"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					if(array_camino_correcto[estado_de_la_respuesta-1] == "4-5"){
+	    					//Se espera a que ambos números se pisen
+	    				} else {
+	    					//Sí el botón pisado es el incorrecto
+	    					estado_de_la_respuesta = 1;
+	    					barra_progreso_respuesta.fillAmount = 0f;
+	    					if(vidas_actuales>1){
+	    						vidas_actuales--;
+	    						switch (vidas_actuales) {
+	    							case 1: vida_1.SetActive(true);
+	    									vida_2.SetActive(false);
+	    									vida_3.SetActive(false);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 2: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(false);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 3: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(true);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 4: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(true);
+	    									vida_4.SetActive(true);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    						}
+	    					} else {
+	    						//Se acabaron las vidas
+	    					}
+	    				}
+    				}
+    				acceso_bloqueado_5 = true;
+    			}
+    			if(bandera_control_boton_6 && !acceso_bloqueado_6){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "6"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					//Sí el botón pisado es el incorrecto
+    					estado_de_la_respuesta = 1;
+    					barra_progreso_respuesta.fillAmount = 0f;
+    					if(vidas_actuales>1){
+    						vidas_actuales--;
+    						switch (vidas_actuales) {
+    							case 1: vida_1.SetActive(true);
+    									vida_2.SetActive(false);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 2: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 3: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 4: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(true);
+    									vida_5.SetActive(false); 
+    									break;
+    						}
+    					} else {
+    						//Se acabaron las vidas
+    					}
+    				}
+    				acceso_bloqueado_6 = true;
+    			}
+    			if(bandera_control_boton_7 && !acceso_bloqueado_7){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "7"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					if(array_camino_correcto[estado_de_la_respuesta-1] == "7-8"){
+	    					//Se espera a que ambos números se pisen
+	    				} else {
+	    					//Sí el botón pisado es el incorrecto
+	    					estado_de_la_respuesta = 1;
+	    					barra_progreso_respuesta.fillAmount = 0f;
+	    					if(vidas_actuales>1){
+	    						vidas_actuales--;
+	    						switch (vidas_actuales) {
+	    							case 1: vida_1.SetActive(true);
+	    									vida_2.SetActive(false);
+	    									vida_3.SetActive(false);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 2: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(false);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 3: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(true);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 4: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(true);
+	    									vida_4.SetActive(true);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    						}
+	    					} else {
+	    						//Se acabaron las vidas
+	    					}
+	    				}
+    				}
+    				acceso_bloqueado_7 = true;
+    			}
+    			if(bandera_control_boton_8 && !acceso_bloqueado_8){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "8"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					if(array_camino_correcto[estado_de_la_respuesta-1] == "7-8"){
+	    					//Se espera a que ambos números se pisen
+	    				} else {
+	    					//Sí el botón pisado es el incorrecto
+	    					estado_de_la_respuesta = 1;
+	    					barra_progreso_respuesta.fillAmount = 0f;
+	    					if(vidas_actuales>1){
+	    						vidas_actuales--;
+	    						switch (vidas_actuales) {
+	    							case 1: vida_1.SetActive(true);
+	    									vida_2.SetActive(false);
+	    									vida_3.SetActive(false);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 2: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(false);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 3: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(true);
+	    									vida_4.SetActive(false);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    							case 4: vida_1.SetActive(true);
+	    									vida_2.SetActive(true);
+	    									vida_3.SetActive(true);
+	    									vida_4.SetActive(true);
+	    									vida_5.SetActive(false); 
+	    									break;
+	    						}
+	    					} else {
+	    						//Se acabaron las vidas
+	    					}
+	    				}
+    				}
+    				acceso_bloqueado_8 = true;
+    			}
+    			if(bandera_control_boton_9 && !acceso_bloqueado_9){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "9"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					//Sí el botón pisado es el incorrecto
+    					estado_de_la_respuesta = 1;
+    					barra_progreso_respuesta.fillAmount = 0f;
+    					if(vidas_actuales>1){
+    						vidas_actuales--;
+    						switch (vidas_actuales) {
+    							case 1: vida_1.SetActive(true);
+    									vida_2.SetActive(false);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 2: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 3: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 4: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(true);
+    									vida_5.SetActive(false); 
+    									break;
+    						}
+    					} else {
+    						//Se acabaron las vidas
+    					}
+    				}
+    				acceso_bloqueado_9 = true;
+    			}
+    			if(bandera_control_boton_10 && !acceso_bloqueado_10){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "10"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				} else {
+    					//Sí el botón pisado es el incorrecto
+    					estado_de_la_respuesta = 1;
+    					barra_progreso_respuesta.fillAmount = 0f;
+    					if(vidas_actuales>1){
+    						vidas_actuales--;
+    						switch (vidas_actuales) {
+    							case 1: vida_1.SetActive(true);
+    									vida_2.SetActive(false);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 2: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(false);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 3: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(false);
+    									vida_5.SetActive(false); 
+    									break;
+    							case 4: vida_1.SetActive(true);
+    									vida_2.SetActive(true);
+    									vida_3.SetActive(true);
+    									vida_4.SetActive(true);
+    									vida_5.SetActive(false); 
+    									break;
+    						}
+    					} else {
+    						//Se acabaron las vidas
+    					}
+    				}
+    				acceso_bloqueado_10 = true;
+    			}
+    			if(bandera_control_boton_4 && bandera_control_boton_5 && !acceso_bloqueado_11){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "4-5"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				}
+    				acceso_bloqueado_11 = true;
+    			}
+    			if(bandera_control_boton_7 && bandera_control_boton_8 && !acceso_bloqueado_12){
+    				if(array_camino_correcto[estado_de_la_respuesta-1] == "7-8"){
+    					estado_de_la_respuesta++;
+    					barra_progreso_respuesta.fillAmount = ((float)(estado_de_la_respuesta-1)/(float)nodos_de_la_respuesta);
+    				}
+    				acceso_bloqueado_12 = true;
+    			}
+    			//Se desbloquean accesos si no se está pisando nada del tapete
+    			if(!bandera_control_boton_1 && !bandera_control_boton_2 && !bandera_control_boton_3 && !bandera_control_boton_4 && !bandera_control_boton_5 && 
+    				!bandera_control_boton_6 && !bandera_control_boton_7 && !bandera_control_boton_8 && !bandera_control_boton_9 && !bandera_control_boton_10){
+    				acceso_bloqueado_1 = false;
+    				acceso_bloqueado_2 = false;
+    				acceso_bloqueado_3 = false;
+    				acceso_bloqueado_4 = false;
+    				acceso_bloqueado_5 = false;
+    				acceso_bloqueado_6 = false;
+    				acceso_bloqueado_7 = false;
+    				acceso_bloqueado_8 = false;
+    				acceso_bloqueado_9 = false;
+    				acceso_bloqueado_10 = false;
+    				acceso_bloqueado_11 = false;
+    				acceso_bloqueado_12 = false;
+    			}
+    			//----------------------------------------------------------
+    			//----------------------------------------------------------
+    			//----------------------------------------------------------
+    		}
+    		//Sí ya se respondió correctamente el ejercicio
+    		if(estado_de_la_respuesta > nodos_de_la_respuesta){
+    			//***************************************************************************************
+    			//*************************SE PASA A SIGUIENTE PREGUNTA**********************************
+    			//***************************************************************************************
+    			if(pregunta_actual<numero_de_preguntas){
+		    		pasar_a_siguiente_pregunta();
+		    	} else {
+		    		//Se llegó al final de la actividad
+		    	}
+    			//***************************************************************************************
+    			//***************************************************************************************
+    		}
+    	}
+    	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+    	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+    	//----------------------------------------------------------------------------------------------------------------------------------------------------------
     	//-------------------------------------------------------------
         //-------------------Movimieto del fondo-----------------------
         //-------------------------------------------------------------
@@ -1189,6 +1706,7 @@ public class Escena_Actividad : MonoBehaviour {
 		    			//----------------------------------------------
 		    			bandera_termino_opacidad_1 = true;
 		    			obtener_datos_SQLite_UPDATE();
+		    			nodos_de_la_respuesta = array_camino_correcto.Count;
 		    			bandera_termino_opacidad = false;
 		    			bandera_pasar_a_siguiente_pregunta = false;
 		    			//----------------------------------------------
