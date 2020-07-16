@@ -201,7 +201,7 @@ public class Escena_Menu : MonoBehaviour
                             bandera_cambio_de_linea =false;
                             contador_array_estado_botones = 0;
                         }
-                        //Sí lo que recive es diferente al retorno de carro y cambio de línea
+                        //Sí lo que recibe es diferente al retorno de carro y cambio de línea
                         if(buffer[0]!=13 && buffer[0]!=10) {
                             //Debug.Log("Se recibió: " +  System.Text.Encoding.UTF8.GetString(buffer));
                             if(contador_array_estado_botones<10){

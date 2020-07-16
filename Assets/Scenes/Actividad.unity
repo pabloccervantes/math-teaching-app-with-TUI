@@ -7804,7 +7804,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa9fb795aadbf8b41850bb6305d93dcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modo_prueba: 0
+  modo_prueba: 1
   pie_1: {fileID: 103963920}
   pie_2: {fileID: 271509005}
   pie_3: {fileID: 430026828}

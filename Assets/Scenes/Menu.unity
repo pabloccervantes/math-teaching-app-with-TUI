@@ -1011,7 +1011,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68de091bfdbc1ab409c4ed2aba5fd72e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modo_prueba: 0
+  modo_prueba: 1
   texto_titulo: {fileID: 54250273}
   ayuda_regresar: {fileID: 984294817}
   fondo_opc_1: {fileID: 1329581756}
